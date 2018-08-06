@@ -27,8 +27,9 @@ def convert(name: str, dp: int):
         if not os.path.exists(folder_name):
             os.mkdir(folder_name)
         target = os.path.join(folder_name, webp_name)
-        px = size.px(dp)
-        resized = image.resize((px, px))
+        width = size.px(dp)
+        height = int(round(width * (image.size[1] / image.size[0])))
+        resized = image.resize((width, height))
 
         lossy = os.path.join(folder_name, "lossy_" + webp_name)
         lossless = os.path.join(folder_name, "lossless_" + webp_name)
