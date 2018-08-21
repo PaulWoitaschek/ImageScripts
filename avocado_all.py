@@ -2,8 +2,8 @@
 
 # Recursively calls avocado on all xml files in a folder
 
-import sys
 import glob
+import sys
 from subprocess import call
 
 folder = sys.argv[1]

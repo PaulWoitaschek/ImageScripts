@@ -1,22 +1,23 @@
 import argparse
 import os
-from PIL import Image
 from enum import Enum
 from pathlib import Path
 
+from PIL import Image
+
 
 class ImageSize(Enum):
-    MDPI = 160
-    HDPI = 240
-    XHDPI = 320
-    XXHDPI = 480
-    XXXHDPI = 640
+    MDPI = 1
+    HDPI = 1.5
+    XHDPI = 2
+    XXHDPI = 3
+    XXXHDPI = 4
 
     def folder_name(self) -> str:
         return "drawable-" + self.name.lower()
 
     def px(self, dp: float) -> int:
-        return (dp * (self.value / 160).__round__()).__int__()
+        return (dp * self.value).__round__().__int__()
 
 
 def convert(name: str, dp: int):
@@ -53,6 +54,6 @@ args = parser.parse_args()
 if args.dp <= 0:
     parser.error("dp must be > 0")
 if not os.path.exists(args.input):
-    parser.error("Image does not exist.")
+    parser.error("Image {} does not exist.".format(args.input))
 
 convert(args.input, args.dp)
