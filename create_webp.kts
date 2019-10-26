@@ -53,6 +53,12 @@ class MyApp : Runnable {
   }
 
   override fun run() {
+    println(inputFiles)
+    inputFiles.forEach {
+      if (it.extension == "svg") {
+        "svgo ${it.absolutePath}".execute()
+      }
+    }
     if (isAndroid) {
       createAndroidImages()
     } else {
@@ -62,17 +68,9 @@ class MyApp : Runnable {
 
   private fun createSingleLargeImages() {
     inputFiles.forEach { input ->
-      if (input.extension != "svg") {
-        throw ParameterException(spec.commandLine(), "File $input is no svg file")
-      }
-      val pngTmp = File(tmpDir, "image.png").apply {
-        delete()
-        deleteOnExit()
-      }
-
-      "inkscape ${input.absolutePath} -e ${pngTmp.absolutePath} --without-gui -h 2048x".execute()
+      val png = input.toPngOrJpg()
       val webp = File(input.parentFile, input.nameWithoutExtension + ".webp")
-      "cwebp -lossless ${pngTmp.absolutePath} -o ${webp.absolutePath}".execute()
+      "cwebp -lossless -resize 0 2048 ${png.absolutePath} -o ${webp.absolutePath}".execute()
     }
   }
 
@@ -83,23 +81,15 @@ class MyApp : Runnable {
     )
 
     inputFiles.forEach { input ->
-      if (input.extension != "svg") {
-        throw ParameterException(spec.commandLine(), "File $input is no svg file")
-      }
-      "svgo ${input.absolutePath}".execute()
-      val pngTmp = File(tmpDir, "image.png").apply {
-        delete()
-        deleteOnExit()
-      }
       val losslessWebp = File(tmpDir, "lossless.webp")
       val lossyWebp = File(tmpDir, "lossy.webp")
+      val png = input.toPngOrJpg()
       AndroidImageSize.values().forEach {
         lossyWebp.delete()
         losslessWebp.delete()
-        val heightPx = (heightInDp * it.factor).roundToInt()
-        "rsvg-convert ${input.absolutePath} -h $heightPx -o ${pngTmp.absolutePath}".execute()
-        "cwebp -short -lossless ${pngTmp.absolutePath} -o ${losslessWebp.absolutePath}".execute()
-        "cwebp -short ${pngTmp.absolutePath} -o ${lossyWebp.absolutePath}".execute()
+        val heightInPx = (heightInDp * it.factor).roundToInt()
+        "cwebp -resize 0 $heightInPx -short -lossless ${png.absolutePath} -o ${losslessWebp.absolutePath}".execute()
+        "cwebp -resize 0 $heightInPx -short ${png.absolutePath} -o ${lossyWebp.absolutePath}".execute()
         val pickLossless = losslessWebp.length() < lossyWebp.length()
         val targetWebp = if (pickLossless) losslessWebp else lossyWebp
         val webp = File("drawable-${it.name.toLowerCase()}", input.nameWithoutExtension + ".webp").apply {
@@ -108,6 +98,18 @@ class MyApp : Runnable {
         }
         targetWebp.copyTo(webp)
       }
+    }
+  }
+
+  private fun File.toPngOrJpg(): File {
+    return when (extension.toLowerCase()) {
+      "svg" -> File(tmpDir, "image.png").also { png ->
+        png.delete()
+        png.deleteOnExit()
+        "rsvg-convert $absolutePath -h 4096 -o ${png.absolutePath}".execute()
+      }
+      "jpg", "png", "jpeg" -> this
+      else -> throw ParameterException(spec.commandLine(), "$this is must be a svg or png file")
     }
   }
 }
