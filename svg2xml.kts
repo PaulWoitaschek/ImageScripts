@@ -1,7 +1,7 @@
 #!/usr/bin/env kscript
 @file:DependsOn("com.beust:jcommander:1.71")
 @file:DependsOn("org.apache.commons:commons-exec:1.3")
-@file:DependsOn("com.android.tools:sdk-common:26.5.0")
+@file:DependsOn("com.android.tools:sdk-common:26.6.0-rc01")
 @file:MavenRepository("google", "https://dl.google.com/dl/android/maven2")
 
 
