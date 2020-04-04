@@ -1,15 +1,15 @@
-#!/usr/bin/env kscript
-@file:DependsOn("org.apache.commons:commons-exec:1.3")
-@file:DependsOn("info.picocli:picocli:3.8.1")
+#!/usr/bin/env kotlin
+@file:DependsOn("com.github.ajalt:clikt:2.6.0")
 
 
-import org.apache.commons.exec.DefaultExecutor
-import picocli.CommandLine
-import picocli.CommandLine.Command
-import picocli.CommandLine.Option
-import picocli.CommandLine.ParameterException
-import picocli.CommandLine.Parameters
-import picocli.CommandLine.Spec
+import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.core.UsageError
+import com.github.ajalt.clikt.parameters.arguments.argument
+import com.github.ajalt.clikt.parameters.arguments.multiple
+import com.github.ajalt.clikt.parameters.options.flag
+import com.github.ajalt.clikt.parameters.options.option
+import com.github.ajalt.clikt.parameters.types.file
+import com.github.ajalt.clikt.parameters.types.int
 import java.io.File
 import kotlin.math.roundToInt
 
@@ -23,28 +23,22 @@ enum class AndroidImageSize(val factor: Double) {
 }
 
 
-@Command(
-  name = "Image Converter",
-  mixinStandardHelpOptions = true
-)
-class MyApp : Runnable {
+class CreateWebP : CliktCommand() {
 
-  @Spec
-  lateinit var spec: CommandLine.Model.CommandSpec
+  private val inputFiles: List<File> by argument().file(mustBeReadable = true).multiple()
 
-  @Parameters(description = ["The files to convert"])
-  private var inputFiles: List<File> = mutableListOf()
+  private val isAndroid: Boolean by option("-a", "--android").flag()
 
-  @Option(names = ["-a", "--android"])
-  private var isAndroid: Boolean = false
+  private val heightInDp: Int? by option("-dp").int()
 
-  @Option(names = ["-dp"])
-  private var heightInDp: Int? = null
 
-  private val executor = DefaultExecutor()
-
-  private fun String.execute() {
-    executor.execute(org.apache.commons.exec.CommandLine.parse(this))
+  private fun execute(vararg command: String) {
+    ProcessBuilder()
+      .inheritIO()
+      .command(*command)
+      .start()
+      .waitFor()
+      .also { check(it == 0) }
   }
 
   private val tmpDir = File("/tmp/image_script").apply {
@@ -56,7 +50,7 @@ class MyApp : Runnable {
     println(inputFiles)
     inputFiles.forEach {
       if (it.extension == "svg") {
-        "svgo ${it.absolutePath}".execute()
+        execute("svgo", it.absolutePath)
       }
     }
     if (isAndroid) {
@@ -70,16 +64,12 @@ class MyApp : Runnable {
     inputFiles.forEach { input ->
       val png = input.toPngOrJpg()
       val webp = File(input.parentFile, input.nameWithoutExtension + ".webp")
-      "cwebp -lossless -resize 0 2048 ${png.absolutePath} -o ${webp.absolutePath}".execute()
+      execute("cwebp", "-lossless", "-resize", "0", "2048", png.absolutePath, "-o", webp.absolutePath)
     }
   }
 
   private fun createAndroidImages() {
-    val heightInDp = heightInDp ?: throw ParameterException(
-      spec.commandLine(),
-      "In android-mode you  must specify the height in dp too."
-    )
-
+    val heightInDp = heightInDp ?: throw UsageError("In android-mode you must specify the height in dp too.")
     inputFiles.forEach { input ->
       val losslessWebp = File(tmpDir, "lossless.webp")
       val lossyWebp = File(tmpDir, "lossy.webp")
@@ -88,8 +78,8 @@ class MyApp : Runnable {
         lossyWebp.delete()
         losslessWebp.delete()
         val heightInPx = (heightInDp * it.factor).roundToInt()
-        "cwebp -resize 0 $heightInPx -short -lossless ${png.absolutePath} -o ${losslessWebp.absolutePath}".execute()
-        "cwebp -resize 0 $heightInPx -short ${png.absolutePath} -o ${lossyWebp.absolutePath}".execute()
+        execute("cwebp", "-resize", "0", "$heightInPx", "-short", "-lossless", png.absolutePath, "-o", losslessWebp.absolutePath)
+        execute("cwebp", "-resize", "0", "$heightInPx", "-short", png.absolutePath, "-o", lossyWebp.absolutePath)
         val pickLossless = losslessWebp.length() < lossyWebp.length()
         val targetWebp = if (pickLossless) losslessWebp else lossyWebp
         val webp = File("drawable-${it.name.toLowerCase()}", input.nameWithoutExtension + ".webp").apply {
@@ -106,12 +96,12 @@ class MyApp : Runnable {
       "svg" -> File(tmpDir, "image.png").also { png ->
         png.delete()
         png.deleteOnExit()
-        "rsvg-convert $absolutePath -h 4096 -o ${png.absolutePath}".execute()
+        execute("rsvg-convert", absolutePath, "-h", "4096", "-o", png.absolutePath)
       }
       "jpg", "png", "jpeg" -> this
-      else -> throw ParameterException(spec.commandLine(), "$this is must be a svg or png file")
+      else -> throw UsageError("$this is must be a svg or png file")
     }
   }
 }
 
-CommandLine.run(MyApp(), *args)
+CreateWebP().main(args)
