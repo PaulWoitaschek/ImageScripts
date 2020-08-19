@@ -1,6 +1,7 @@
 #!/usr/bin/env kotlin
-@file:DependsOn("com.github.ajalt:clikt:2.6.0")
-@file:DependsOn("com.android.tools:sdk-common:26.6.2")
+@file:Repository("https://maven.google.com")
+@file:DependsOn("com.github.ajalt:clikt:2.7.1")
+@file:DependsOn("com.android.tools:sdk-common:27.0.1")
 
 import com.android.ide.common.vectordrawable.Svg2Vector
 import com.github.ajalt.clikt.core.CliktCommand

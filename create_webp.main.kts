@@ -1,6 +1,5 @@
 #!/usr/bin/env kotlin
-@file:DependsOn("com.github.ajalt:clikt:2.6.0")
-
+@file:DependsOn("com.github.ajalt:clikt:2.7.1")
 
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.UsageError
@@ -13,7 +12,6 @@ import com.github.ajalt.clikt.parameters.types.int
 import java.io.File
 import kotlin.math.roundToInt
 
-
 enum class AndroidImageSize(val factor: Double) {
   MDPI(1.0),
   HDPI(1.5),
@@ -22,7 +20,6 @@ enum class AndroidImageSize(val factor: Double) {
   XXXHDPI(4.0)
 }
 
-
 class CreateWebP : CliktCommand() {
 
   private val inputFiles: List<File> by argument().file(mustBeReadable = true).multiple()
@@ -30,7 +27,6 @@ class CreateWebP : CliktCommand() {
   private val isAndroid: Boolean by option("-a", "--android").flag()
 
   private val heightInDp: Int? by option("-dp").int()
-
 
   private fun execute(vararg command: String) {
     ProcessBuilder()
@@ -47,7 +43,6 @@ class CreateWebP : CliktCommand() {
   }
 
   override fun run() {
-    println(inputFiles)
     inputFiles.forEach {
       if (it.extension == "svg") {
         execute("svgo", it.absolutePath)
