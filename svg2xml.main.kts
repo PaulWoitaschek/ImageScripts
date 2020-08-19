@@ -1,18 +1,21 @@
 #!/usr/bin/env kotlin
 @file:Repository("https://maven.google.com")
-@file:DependsOn("com.github.ajalt:clikt:2.7.1")
+@file:DependsOn("com.github.ajalt:clikt:2.8.0")
 @file:DependsOn("com.android.tools:sdk-common:27.0.1")
 
 import com.android.ide.common.vectordrawable.Svg2Vector
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.arguments.argument
 import com.github.ajalt.clikt.parameters.arguments.multiple
+import com.github.ajalt.clikt.parameters.options.flag
+import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.file
 import java.io.File
 
 class SvgToXml : CliktCommand() {
 
   private val files by argument().file(mustBeReadable = true).multiple()
+  private val asIcon by option("--as-icon").flag(default = true)
 
   override fun run() {
     files.toSet()
@@ -29,6 +32,14 @@ class SvgToXml : CliktCommand() {
     val baseNameCleaned = input.nameWithoutExtension
       .replace('.', '_')
       .replace('-', '_')
+      .toLowerCase()
+      .run {
+        if (asIcon) {
+          prependIfAbsent("ic_")
+        } else {
+          this
+        }
+      }
     val xml = File(input.parentFile, "$baseNameCleaned.xml")
 
     xml.outputStream().use {
@@ -39,10 +50,14 @@ class SvgToXml : CliktCommand() {
         } else {
           execute("avocado", xml.absolutePath)
         }
+        if (asIcon) {
+          xml.replaceColorsWithColorControlNormal()
+        }
       } catch (e: Exception) {
         e.printStackTrace()
         xml.delete()
       }
+      Unit
     }
   }
 
@@ -53,6 +68,20 @@ class SvgToXml : CliktCommand() {
       .start()
       .waitFor()
       .also { check(it == 0) }
+  }
+
+  private fun File.replaceColorsWithColorControlNormal() {
+    val fillColorRegex = "fillColor=\"(.*?)\"".toRegex(RegexOption.MULTILINE)
+    val withReplacedColors = readText().replace(fillColorRegex, "fillColor=\"?android:attr/colorControlNormal\"")
+    writeText(withReplacedColors)
+  }
+
+  private fun String.prependIfAbsent(prefix: String): String {
+    return if (this.startsWith(prefix)) {
+      this
+    } else {
+      "$prefix$this"
+    }
   }
 }
 
