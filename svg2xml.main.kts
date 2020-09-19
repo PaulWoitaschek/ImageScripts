@@ -32,6 +32,7 @@ class SvgToXml : CliktCommand() {
     val baseNameCleaned = input.nameWithoutExtension
       .replace('.', '_')
       .replace('-', '_')
+      .replace(' ', '_')
       .toLowerCase()
       .run {
         if (asIcon) {
