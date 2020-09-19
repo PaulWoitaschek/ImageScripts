@@ -15,7 +15,7 @@ import java.io.File
 class SvgToXml : CliktCommand() {
 
   private val files by argument().file(mustBeReadable = true).multiple()
-  private val asIcon by option("--as-icon").flag(default = true)
+  private val asIcon by option("--as-icon").flag("--as-image", default = false)
 
   override fun run() {
     files.toSet()
