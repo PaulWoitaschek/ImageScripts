@@ -26,7 +26,8 @@ class CreateWebP : CliktCommand() {
 
   private val isAndroid: Boolean by option("-a", "--android").flag()
 
-  private val heightInDp: Int? by option("-dp").int()
+  private val dp: Int? by option("-dp").int()
+  private val constrainWidth by option("-cw", "--constrain-width").flag(default = true)
 
   private fun execute(vararg command: String) {
     ProcessBuilder()
@@ -58,13 +59,22 @@ class CreateWebP : CliktCommand() {
   private fun createSingleLargeImages() {
     inputFiles.forEach { input ->
       val png = input.toPngOrJpg()
-      val webp = File(input.parentFile, input.nameWithoutExtension + ".webp")
-      execute("cwebp", "-lossless", "-resize", "0", "2048", png.absolutePath, "-o", webp.absolutePath)
+      val webp = File(input.parentFile, input.nameWithWebpExtension())
+      execute(
+        "cwebp",
+        "-lossless",
+        "-resize",
+        if (constrainWidth) "2048" else "0",
+        if (constrainWidth) "0" else "2048",
+        png.absolutePath,
+        "-o",
+        webp.absolutePath
+      )
     }
   }
 
   private fun createAndroidImages() {
-    val heightInDp = heightInDp ?: throw UsageError("In android-mode you must specify the height in dp too.")
+    val size = dp ?: throw UsageError("In android-mode you must specify the size in dp too.")
     inputFiles.forEach { input ->
       val losslessWebp = File(tmpDir, "lossless.webp")
       val lossyWebp = File(tmpDir, "lossy.webp")
@@ -72,12 +82,31 @@ class CreateWebP : CliktCommand() {
       AndroidImageSize.values().forEach {
         lossyWebp.delete()
         losslessWebp.delete()
-        val heightInPx = (heightInDp * it.factor).roundToInt()
-        execute("cwebp", "-resize", "0", "$heightInPx", "-short", "-lossless", png.absolutePath, "-o", losslessWebp.absolutePath)
-        execute("cwebp", "-resize", "0", "$heightInPx", "-short", png.absolutePath, "-o", lossyWebp.absolutePath)
+        val sizeInPx = (size * it.factor).roundToInt()
+        execute(
+          "cwebp",
+          "-resize",
+          if (constrainWidth) "$sizeInPx" else "0",
+          if (constrainWidth) "0" else "$sizeInPx",
+          "-short",
+          "-lossless",
+          png.absolutePath,
+          "-o",
+          losslessWebp.absolutePath
+        )
+        execute(
+          "cwebp",
+          "-resize",
+          if (constrainWidth) "$sizeInPx" else "0",
+          if (constrainWidth) "0" else "$sizeInPx",
+          "-short",
+          png.absolutePath,
+          "-o",
+          lossyWebp.absolutePath
+        )
         val pickLossless = losslessWebp.length() < lossyWebp.length()
         val targetWebp = if (pickLossless) losslessWebp else lossyWebp
-        val webp = File("drawable-${it.name.toLowerCase()}", input.nameWithoutExtension + ".webp").apply {
+        val webp = File("drawable-${it.name.toLowerCase()}", input.nameWithWebpExtension()).apply {
           delete()
           parentFile.mkdirs()
         }
@@ -86,12 +115,26 @@ class CreateWebP : CliktCommand() {
     }
   }
 
+  private fun File.nameWithWebpExtension(): String {
+    return nameWithoutExtension
+      .run {
+        if (get(0).isDigit()) {
+          "image_$this"
+        } else {
+          this
+        }
+      }
+      .replace(".", "_")
+      .replace("-", "_")
+      .plus(".webp")
+  }
+
   private fun File.toPngOrJpg(): File {
     return when (extension.toLowerCase()) {
       "svg" -> File(tmpDir, "image.png").also { png ->
         png.delete()
         png.deleteOnExit()
-        execute("rsvg-convert", absolutePath, "-h", "4096", "-o", png.absolutePath)
+        execute("rsvg-convert", absolutePath, "-w", "4096", "-o", png.absolutePath)
       }
       "jpg", "png", "jpeg" -> this
       else -> throw UsageError("$this is must be a svg or png file")
