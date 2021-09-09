@@ -1,7 +1,8 @@
 #!/usr/bin/env kotlin
 @file:Repository("https://maven.google.com")
 @file:DependsOn("com.github.ajalt.clikt:clikt-jvm:3.1.0")
-@file:DependsOn("com.android.tools:sdk-common:27.1.3")
+@file:DependsOn("com.android.tools:sdk-common:30.0.2")
+@file:DependsOn("com.android.tools:common:30.0.2")
 
 import com.android.ide.common.vectordrawable.Svg2Vector
 import com.github.ajalt.clikt.core.CliktCommand
@@ -33,7 +34,7 @@ class SvgToXml : CliktCommand() {
       .replace('.', '_')
       .replace('-', '_')
       .replace(' ', '_')
-      .toLowerCase()
+      .lowercase()
       .run {
         if (asIcon) {
           prependIfAbsent("ic_")
