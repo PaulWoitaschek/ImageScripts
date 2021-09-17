@@ -13,6 +13,8 @@ This repository is a collection of image scripts for creating android image asse
 
 ```bash
 ./svg2xml.sh --help
+
+# This creates a my_file.xml android vector resource
 ./svg2xml.sh my_file.svg
 ```
 
