@@ -17,7 +17,7 @@ This repository is a collection of image scripts for creating android image asse
 android_images svg2xml --help
 
 # This creates a my_file.xml android vector resource
-android_images svg2xml --help my_file.svg
+android_images svg2xml my_file.svg
 ```
 
 ### WebP
