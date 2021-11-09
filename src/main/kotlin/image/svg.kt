@@ -8,7 +8,7 @@ import com.github.ajalt.clikt.parameters.types.file
 import java.io.File
 
 class SvgToXml : CliktCommand(
-  name = "svg_to_xml",
+  name = "svg2xml",
   help = "Converts svg files to android xml vector drawables."
 ) {
 
