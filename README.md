@@ -2,29 +2,29 @@
 
 This repository is a collection of image scripts for creating android image assets.
 
-## Installation
+## Android Vector Drawables
 
-* You need to have `cwebp` in your path -> [Installation](https://developers.google.com/speed/webp/download?hl=de)
-* Install the pip requirements: `pip install -r requirements.txt`
-* Run `./gradlew installDist`
-* Add `./build/install/android_images/bin` to your path
+### Requirements:
 
-## Usage
-
-### Android Vector Images
+Install svgo and avocado:
+`npm install -g svgo avocado`
 
 ```bash
-android_images svg2xml --help
+./svg2xml.sh --help
 
 # This creates a my_file.xml android vector resource
-android_images svg2xml my_file.svg
+./svg2xml.sh my_file.svg
 ```
 
-### WebP
+## WebP
+
+### Requirements:
+
+* You need to have `cwebp` in your path -> [Installation cwebp](https://developers.google.com/speed/webp/download?hl=de)
 
 ```bash
-android_images create_webp --help
+./webp.sh --help
 
 # This creates image.webp files in the density bucket folders (drawable-xhdpi, drawable-xxhdpi, ...)
-android_images create_webp -dp=300 image.png
+./webp.sh -dp=300 image.png
 ```
