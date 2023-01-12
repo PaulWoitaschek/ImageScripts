@@ -11,7 +11,7 @@ repositories {
 dependencies {
   implementation(platform("org.jetbrains.kotlin:kotlin-bom"))
   implementation("com.github.ajalt.clikt:clikt:3.5.0")
-  implementation("com.android.tools:sdk-common:30.3.1")
+  implementation("com.android.tools:sdk-common:30.4.0")
   implementation("com.android.tools:common:30.3.1")
 }
 
