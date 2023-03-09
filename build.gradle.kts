@@ -19,3 +19,7 @@ application {
   mainClass.set("image.AppKt")
   applicationName = "android_images"
 }
+
+tasks.wrapper {
+  distributionType = Wrapper.DistributionType.ALL
+}
