@@ -1,0 +1,11 @@
+[versions]
+androidTools = "30.4.2"
+
+[libraries]
+clikt = "com.github.ajalt.clikt:clikt:3.5.2"
+
+androidTools-common = { module = "com.android.tools:common", version.ref = "androidTools" }
+androidTools-sdkCommon = { module = "com.android.tools:sdk-common", version.ref = "androidTools" }
+
+[plugins]
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version = "1.8.10" }
