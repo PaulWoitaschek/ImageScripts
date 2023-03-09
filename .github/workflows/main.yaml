@@ -3,11 +3,12 @@ name: Main
 on: [ push, pull_request ]
 env:
   GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx3072m -XX:MaxMetaspaceSize=1g -Xms512m -XX:+HeapDumpOnOutOfMemoryError"
-build:
-  test:
-    timeout-minutes: 60
-    runs-on: ubuntu-latest
+jobs:
+  build:
+    test:
+      timeout-minutes: 60
+      runs-on: ubuntu-latest
 
-    steps:
-      - uses: actions/checkout@v3
-      - run: ./gradlew build
+      steps:
+        - uses: actions/checkout@v3
+        - run: ./gradlew build
