@@ -2,7 +2,7 @@
 androidTools = "30.4.2"
 
 [libraries]
-clikt = "com.github.ajalt.clikt:clikt:3.5.2"
+clikt = "com.github.ajalt.clikt:clikt:3.5.4"
 
 androidTools-common = { module = "com.android.tools:common", version.ref = "androidTools" }
 androidTools-sdkCommon = { module = "com.android.tools:sdk-common", version.ref = "androidTools" }
