@@ -23,3 +23,7 @@ application {
 tasks.wrapper {
   distributionType = Wrapper.DistributionType.ALL
 }
+
+kotlin {
+  jvmToolchain(20)
+}
