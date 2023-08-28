@@ -3,11 +3,6 @@ plugins {
   application
 }
 
-repositories {
-  mavenCentral()
-  google()
-}
-
 dependencies {
   enforcedPlatform(platform("org.jetbrains.kotlin:kotlin-bom"))
   implementation(libs.clikt)
