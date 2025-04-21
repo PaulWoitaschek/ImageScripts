@@ -1,5 +1,5 @@
 [versions]
-androidTools = "31.1.1"
+androidTools = "31.9.2"
 
 [libraries]
 clikt = "com.github.ajalt.clikt:clikt:4.2.0"
