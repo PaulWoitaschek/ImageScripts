@@ -6,8 +6,8 @@ This repository is a collection of image scripts for creating android image asse
 
 ### Requirements:
 
-Install svgo and avocado:
-`npm install -g svgo avocado`
+Install svgo :
+`npm install -g svgo`
 
 ```bash
 ./svg2xml.sh --help

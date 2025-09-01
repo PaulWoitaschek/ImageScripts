@@ -39,8 +39,6 @@ class SvgToXml : CliktCommand(
         val error = Svg2Vector.parseSvgToXml(input.toPath(), it)
         if (error.isNotEmpty()) {
           echo("Error in Svg2Vector for $input\n$error")
-        } else {
-          execute("avocado", xml.absolutePath)
         }
       } catch (e: Exception) {
         e.printStackTrace()
